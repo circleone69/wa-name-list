@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#075E54" />
-  <meta http-equiv="Cache-Control" content="no-cache" />
   <title>WA Name List</title>
   <style>
     :root { --wa-teal:#075E54; --wa-accent:#25D366; --wa-chat:#ECE5DD; --wa-bubble:#DCF8C6; --ink:#111B21; --muted:#667781; --danger:#E53935; }
@@ -24,6 +23,7 @@
     .hint { margin: 8px 0 0; color: var(--muted); font-size: 12px; }
     .toolbar { display: flex; gap: 8px; padding: 10px 12px 0; flex-wrap: wrap; }
     .toolbar button { background: #fff; color: var(--wa-teal); border-radius: 18px; padding: 8px 12px; font-size: 13px; }
+    .toolbar button.wa { background: var(--wa-accent); color: #053; }
     .toolbar button.danger { color: var(--danger); }
     main { flex: 1; padding: 12px; }
     .empty { background: #fff; border-radius: 16px; padding: 28px 18px; text-align: center; color: var(--muted); }
@@ -31,7 +31,7 @@
     li { background: var(--wa-bubble); border-radius: 16px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; }
     .num { width: 24px; color: var(--muted); font-size: 12px; } .name { flex: 1; font-size: 16px; }
     .icon { width: 32px; height: 32px; border-radius: 50%; background: transparent; color: var(--wa-teal); }
-    .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #111B21; color: #fff; padding: 10px 14px; border-radius: 8px; font-size: 13px; display: none; }
+    .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #111B21; color: #fff; padding: 10px 14px; border-radius: 8px; font-size: 13px; display: none; z-index: 9; }
     .toast.show { display: block; }
   </style>
 </head>
@@ -61,9 +61,10 @@
           <button class="add-btn" type="submit" id="addBtn">Add</button>
         </div>
       </form>
-      <p class="hint">Tap Add after each name. Then Copy list and paste it in your WhatsApp Business group.</p>
+      <p class="hint">Add names here. Tap <b>Send to group</b>, search the group name, then send.</p>
     </div>
     <div class="toolbar">
+      <button type="button" class="wa" id="sendGroup">Send to group</button>
       <button type="button" id="copyList">Copy list</button>
       <button type="button" id="downloadList">Download</button>
       <button type="button" class="danger" id="clearAll">Clear names</button>
@@ -93,7 +94,7 @@
       function show(msg) {
         toast.textContent = msg;
         toast.className = "toast show";
-        setTimeout(function () { toast.className = "toast"; }, 1600);
+        setTimeout(function () { toast.className = "toast"; }, 2000);
       }
       function load() {
         try {
@@ -113,8 +114,7 @@
         return typeof item === "string" ? item : (item && item.name) || "";
       }
       function draw() {
-        var title = clean(state.title) || "Name list";
-        headerTitle.textContent = title;
+        headerTitle.textContent = clean(state.title) || "Name list";
         headerDesc.textContent = clean(state.description) || "Type a name, tap Add.";
         titleInput.value = state.title;
         descInput.value = state.description;
@@ -132,11 +132,7 @@
       }
       function addName() {
         var name = clean(input.value);
-        if (!name) {
-          show("Type a name first");
-          input.focus();
-          return;
-        }
+        if (!name) { show("Type a name first"); input.focus(); return; }
         for (var i = 0; i < state.names.length; i++) {
           if (nameOf(state.names[i]).toLowerCase() === name.toLowerCase()) {
             show("Already on the list");
@@ -157,20 +153,28 @@
         for (var i = 0; i < state.names.length; i++) lines.push((i + 1) + ". " + nameOf(state.names[i]));
         return lines.join("\n");
       }
+      function sendToGroup() {
+        if (!state.names.length) return show("Add a name first");
+        var text = listText();
+        var encoded = encodeURIComponent(text);
+        var android = /android/i.test(navigator.userAgent || "");
+        show("Search the group name, then tap Send");
+        if (android) {
+          window.location.href = "intent://send?text=" + encoded + "#Intent;scheme=whatsapp;package=com.whatsapp.w4b;S.browser_fallback_url=whatsapp://send?text=" + encoded + ";end";
+          return;
+        }
+        window.location.href = "whatsapp-business://send?text=" + encoded;
+        setTimeout(function () {
+          window.location.href = "whatsapp://send?text=" + encoded;
+        }, 700);
+      }
 
       load();
       draw();
-
-      form.addEventListener("submit", function (e) {
-        e.preventDefault();
-        addName();
-      });
-      document.getElementById("addBtn").addEventListener("click", function (e) {
-        e.preventDefault();
-        addName();
-      });
-      titleInput.addEventListener("input", function () { state.title = titleInput.value; save(); draw(); });
-      descInput.addEventListener("input", function () { state.description = descInput.value; save(); draw(); });
+      form.addEventListener("submit", function (e) { e.preventDefault(); addName(); });
+      document.getElementById("addBtn").addEventListener("click", function (e) { e.preventDefault(); addName(); });
+      titleInput.addEventListener("input", function () { state.title = titleInput.value; save(); headerTitle.textContent = clean(state.title) || "Name list"; });
+      descInput.addEventListener("input", function () { state.description = descInput.value; save(); headerDesc.textContent = clean(state.description) || "Type a name, tap Add."; });
       listEl.addEventListener("click", function (e) {
         var btn = e.target.closest("button[data-i]");
         if (!btn) return;
@@ -178,20 +182,20 @@
         save();
         draw();
       });
+      document.getElementById("sendGroup").addEventListener("click", sendToGroup);
       document.getElementById("copyList").addEventListener("click", function () {
         if (!state.names.length) return show("Add a name first");
         var text = listText();
         if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(text).then(function () { show("Copied. Paste in your WhatsApp group."); }).catch(function () { window.prompt("Copy this list", text); });
+          navigator.clipboard.writeText(text).then(function () { show("Copied. Open the group and paste."); }).catch(function () { window.prompt("Copy this list", text); });
         } else {
           window.prompt("Copy this list", text);
         }
       });
       document.getElementById("downloadList").addEventListener("click", function () {
         if (!state.names.length) return show("Add a name first");
-        var blob = new Blob([listText()], { type: "text/plain" });
         var a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
+        a.href = URL.createObjectURL(new Blob([listText()], { type: "text/plain" }));
         a.download = "name-list.txt";
         a.click();
       });
@@ -207,7 +211,6 @@
           regs.forEach(function (r) { r.unregister(); });
         });
       }
-      input.focus();
     })();
   </script>
 </body>
