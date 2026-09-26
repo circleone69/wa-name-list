@@ -17,10 +17,12 @@
     label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; margin: 0 0 6px; }
     .field { margin-bottom: 10px; }
     input, textarea { width: 100%; border: 1px solid #d8e0e5; border-radius: 14px; padding: 11px 12px; font-size: 16px; background: #f0f2f5; font-family: inherit; }
+    input:disabled, textarea:disabled { opacity: .75; }
     .row { display: flex; gap: 8px; } .row input { flex: 1; border-radius: 24px; }
     button { border: 0; cursor: pointer; font-weight: 650; }
     .add-btn { background: var(--wa-accent); color: #053; border-radius: 24px; padding: 0 16px; min-width: 72px; }
     .hint { margin: 8px 0 0; color: var(--muted); font-size: 12px; }
+    .lock { margin: 8px 12px 0; background: #e8f5e9; color: #1b5e20; border-radius: 12px; padding: 10px 12px; font-size: 13px; }
     .toolbar { display: flex; gap: 8px; padding: 10px 12px 0; flex-wrap: wrap; }
     .toolbar button { background: #fff; color: var(--wa-teal); border-radius: 18px; padding: 8px 12px; font-size: 13px; }
     .toolbar button.wa { background: var(--wa-accent); color: #053; }
@@ -33,6 +35,7 @@
     .icon { width: 32px; height: 32px; border-radius: 50%; background: transparent; color: var(--wa-teal); }
     .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #111B21; color: #fff; padding: 10px 14px; border-radius: 8px; font-size: 13px; display: none; z-index: 9; }
     .toast.show { display: block; }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
@@ -44,6 +47,7 @@
       </div>
       <div class="count-pill" id="count">0 names</div>
     </header>
+    <p class="lock" id="lockNote">Members can add names only. Delete and Clear stay locked unless you unlock as owner.</p>
     <div class="box">
       <div class="field">
         <label for="titleInput">List name</label>
@@ -61,13 +65,14 @@
           <button class="add-btn" type="submit" id="addBtn">Add</button>
         </div>
       </form>
-      <p class="hint">Tap <b>Send to group</b>, choose <b>WhatsApp Business</b>, search the group, then send.</p>
+      <p class="hint">Add a name, then Send to group. Existing names cannot be removed without the owner PIN.</p>
     </div>
     <div class="toolbar">
       <button type="button" class="wa" id="sendGroup">Send to group</button>
       <button type="button" id="copyList">Copy list</button>
       <button type="button" id="downloadList">Download</button>
-      <button type="button" class="danger" id="clearAll">Clear names</button>
+      <button type="button" class="danger hidden" id="clearAll">Clear names</button>
+      <button type="button" id="ownerBtn">Owner unlock</button>
     </div>
     <main>
       <div class="empty" id="empty">Your list is empty. Add the first name above.</div>
@@ -78,6 +83,7 @@
   <script>
     (function () {
       var KEY = "wa-name-list-v3";
+      var PIN_KEY = "wa-name-list-owner-pin";
       var titleInput = document.getElementById("titleInput");
       var descInput = document.getElementById("descInput");
       var headerTitle = document.getElementById("headerTitle");
@@ -88,13 +94,23 @@
       var empty = document.getElementById("empty");
       var count = document.getElementById("count");
       var toast = document.getElementById("toast");
+      var clearAll = document.getElementById("clearAll");
+      var ownerBtn = document.getElementById("ownerBtn");
+      var lockNote = document.getElementById("lockNote");
       var state = { title: "Name list", description: "", names: [] };
+      var isOwner = false;
 
       function clean(v) { return String(v || "").replace(/\s+/g, " ").trim(); }
       function show(msg) {
         toast.textContent = msg;
         toast.className = "toast show";
         setTimeout(function () { toast.className = "toast"; }, 2200);
+      }
+      function savedPin() {
+        try { return localStorage.getItem(PIN_KEY) || ""; } catch (e) { return ""; }
+      }
+      function setPin(pin) {
+        try { localStorage.setItem(PIN_KEY, pin); } catch (e) {}
       }
       function load() {
         try {
@@ -118,6 +134,13 @@
         headerDesc.textContent = clean(state.description) || "Type a name, tap Add.";
         titleInput.value = state.title;
         descInput.value = state.description;
+        titleInput.disabled = !isOwner;
+        descInput.disabled = !isOwner;
+        clearAll.className = isOwner ? "danger" : "danger hidden";
+        ownerBtn.textContent = isOwner ? "Lock owner tools" : "Owner unlock";
+        lockNote.textContent = isOwner
+          ? "Owner mode on. You can delete names and edit the list title."
+          : "Members can add names only. Delete and Clear stay locked unless you unlock as owner.";
         count.textContent = state.names.length + (state.names.length === 1 ? " name" : " names");
         empty.style.display = state.names.length ? "none" : "block";
         var html = "";
@@ -125,8 +148,9 @@
           html += "<li><span class=\"num\">" + (i + 1) + "</span><span class=\"name\">" +
             nameOf(state.names[i]).replace(/[&<>]/g, function (c) {
               return ({ "&": "&", "<": "<", ">": ">" })[c];
-            }) +
-            "</span><button class=\"icon\" type=\"button\" data-i=\"" + i + "\">✕</button></li>";
+            }) + "</span>";
+          if (isOwner) html += "<button class=\"icon\" type=\"button\" data-i=\"" + i + "\">✕</button>";
+          html += "</li>";
         }
         listEl.innerHTML = html;
       }
@@ -174,16 +198,53 @@
         }
         copyText(text, "Copied. Open WhatsApp Business, open the group, paste.");
       }
+      function ownerToggle() {
+        if (isOwner) {
+          isOwner = false;
+          draw();
+          show("Owner tools locked");
+          return;
+        }
+        var existing = savedPin();
+        if (!existing) {
+          var created = clean(window.prompt("Create an owner PIN. Only you should know this.") || "");
+          if (created.length < 4) return show("PIN must be at least 4 characters");
+          var again = clean(window.prompt("Type the PIN again") || "");
+          if (created !== again) return show("PINs did not match");
+          setPin(created);
+          isOwner = true;
+          draw();
+          show("Owner PIN saved on this phone");
+          return;
+        }
+        var typed = clean(window.prompt("Enter owner PIN") || "");
+        if (typed !== existing) return show("Wrong PIN");
+        isOwner = true;
+        draw();
+        show("Owner tools unlocked");
+      }
 
       load();
       draw();
       form.addEventListener("submit", function (e) { e.preventDefault(); addName(); });
       document.getElementById("addBtn").addEventListener("click", function (e) { e.preventDefault(); addName(); });
-      titleInput.addEventListener("input", function () { state.title = titleInput.value; save(); headerTitle.textContent = clean(state.title) || "Name list"; });
-      descInput.addEventListener("input", function () { state.description = descInput.value; save(); headerDesc.textContent = clean(state.description) || "Type a name, tap Add."; });
+      titleInput.addEventListener("input", function () {
+        if (!isOwner) return;
+        state.title = titleInput.value;
+        save();
+        headerTitle.textContent = clean(state.title) || "Name list";
+      });
+      descInput.addEventListener("input", function () {
+        if (!isOwner) return;
+        state.description = descInput.value;
+        save();
+        headerDesc.textContent = clean(state.description) || "Type a name, tap Add.";
+      });
       listEl.addEventListener("click", function (e) {
+        if (!isOwner) return;
         var btn = e.target.closest("button[data-i]");
         if (!btn) return;
+        if (!confirm("Remove this name?")) return;
         state.names.splice(Number(btn.getAttribute("data-i")), 1);
         save();
         draw();
@@ -200,13 +261,14 @@
         a.download = "name-list.txt";
         a.click();
       });
-      document.getElementById("clearAll").addEventListener("click", function () {
-        if (!state.names.length) return;
-        if (!confirm("Clear all names?")) return;
+      clearAll.addEventListener("click", function () {
+        if (!isOwner || !state.names.length) return;
+        if (!confirm("Clear all names? This cannot be undone.")) return;
         state.names = [];
         save();
         draw();
       });
+      ownerBtn.addEventListener("click", ownerToggle);
       if (navigator.serviceWorker) {
         navigator.serviceWorker.getRegistrations().then(function (regs) {
           regs.forEach(function (r) { r.unregister(); });
