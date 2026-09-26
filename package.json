@@ -1,0 +1,8 @@
+{
+  "name": "wa-name-list",
+  "private": true,
+  "description": "WhatsApp name list with server-side validation",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
