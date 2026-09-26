@@ -4,34 +4,35 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#075E54" />
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Cache-Control" content="no-cache" />
   <title>WA Name List</title>
-  <link rel="manifest" href="manifest.json" />
   <style>
-    :root { --wa-teal:#075E54; --wa-green:#128C7E; --wa-accent:#25D366; --wa-chat:#ECE5DD; --wa-bubble:#DCF8C6; --ink:#111B21; --muted:#667781; --danger:#E53935; }
-    * { box-sizing:border-box; } html,body{margin:0;height:100%;}
-    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--wa-chat);color:var(--ink);display:flex;justify-content:center;}
-    .app{width:min(520px,100%);min-height:100%;display:flex;flex-direction:column;}
-    header{background:var(--wa-teal);color:#fff;padding:calc(14px + env(safe-area-inset-top)) 16px 14px;display:flex;justify-content:space-between;gap:12px;}
-    header h1{margin:0;font-size:18px;} header p{margin:2px 0 0;font-size:12px;opacity:.85;}
-    .count-pill{background:rgba(255,255,255,.16);border-radius:999px;padding:6px 10px;font-size:12px;height:fit-content;}
-    .meta,.composer{background:#fff;padding:12px;box-shadow:0 1px 8px rgba(0,0,0,.06);}
-    label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin:0 0 6px;}
-    .field{margin-bottom:10px;} input[type=text],textarea{width:100%;border:1px solid #d8e0e5;border-radius:14px;padding:11px 12px;font-size:16px;background:#f0f2f5;font-family:inherit;}
-    textarea{min-height:68px;} .row{display:flex;gap:8px;} .row input{flex:1;border-radius:24px;}
-    button{border:0;cursor:pointer;font-weight:650;} .add-btn{background:var(--wa-accent);color:#053;border-radius:24px;padding:0 16px;min-width:72px;}
-    .hint{margin:8px 2px 0;color:var(--muted);font-size:12px;}
-    .banner{margin:10px 12px 0;background:#fff8e1;border-radius:12px;padding:10px 12px;font-size:13px;color:#5d4037;}
-    .toolbar{display:flex;gap:8px;padding:10px 12px 0;flex-wrap:wrap;}
-    .toolbar button{background:#fff;color:var(--wa-teal);border-radius:18px;padding:8px 12px;font-size:13px;}
-    .toolbar button.danger{color:var(--danger);} main{flex:1;padding:12px;padding-bottom:calc(24px + env(safe-area-inset-bottom));}
-    .empty{background:#fff;border-radius:16px;padding:28px 18px;text-align:center;color:var(--muted);}
-    ul{list-style:none;margin:0;padding:0;display:grid;gap:8px;}
-    li{background:var(--wa-bubble);border-radius:16px 16px 4px 16px;padding:10px 12px;display:flex;align-items:center;gap:10px;}
-    .num{width:24px;color:var(--muted);font-size:12px;text-align:right;} .name{flex:1;font-size:16px;word-break:break-word;}
-    .icon{width:32px;height:32px;border-radius:50%;background:transparent;color:var(--wa-teal);}
-    .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111B21;color:#fff;padding:10px 14px;border-radius:8px;font-size:13px;opacity:0;transition:opacity .2s;}
-    .toast.show{opacity:1;}
+    :root { --wa-teal:#075E54; --wa-accent:#25D366; --wa-chat:#ECE5DD; --wa-bubble:#DCF8C6; --ink:#111B21; --muted:#667781; --danger:#E53935; }
+    * { box-sizing: border-box; } html, body { margin: 0; height: 100%; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--wa-chat); color: var(--ink); display: flex; justify-content: center; }
+    .app { width: min(520px, 100%); min-height: 100%; display: flex; flex-direction: column; }
+    header { background: var(--wa-teal); color: #fff; padding: calc(14px + env(safe-area-inset-top)) 16px 14px; display: flex; justify-content: space-between; gap: 12px; }
+    header h1 { margin: 0; font-size: 18px; } header p { margin: 2px 0 0; font-size: 12px; opacity: .85; }
+    .count-pill { background: rgba(255,255,255,.16); border-radius: 999px; padding: 6px 10px; font-size: 12px; height: fit-content; }
+    .box { background: #fff; padding: 12px; }
+    label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; margin: 0 0 6px; }
+    .field { margin-bottom: 10px; }
+    input, textarea { width: 100%; border: 1px solid #d8e0e5; border-radius: 14px; padding: 11px 12px; font-size: 16px; background: #f0f2f5; font-family: inherit; }
+    .row { display: flex; gap: 8px; } .row input { flex: 1; border-radius: 24px; }
+    button { border: 0; cursor: pointer; font-weight: 650; }
+    .add-btn { background: var(--wa-accent); color: #053; border-radius: 24px; padding: 0 16px; min-width: 72px; }
+    .hint { margin: 8px 0 0; color: var(--muted); font-size: 12px; }
+    .toolbar { display: flex; gap: 8px; padding: 10px 12px 0; flex-wrap: wrap; }
+    .toolbar button { background: #fff; color: var(--wa-teal); border-radius: 18px; padding: 8px 12px; font-size: 13px; }
+    .toolbar button.danger { color: var(--danger); }
+    main { flex: 1; padding: 12px; }
+    .empty { background: #fff; border-radius: 16px; padding: 28px 18px; text-align: center; color: var(--muted); }
+    ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+    li { background: var(--wa-bubble); border-radius: 16px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; }
+    .num { width: 24px; color: var(--muted); font-size: 12px; } .name { flex: 1; font-size: 16px; }
+    .icon { width: 32px; height: 32px; border-radius: 50%; background: transparent; color: var(--wa-teal); }
+    .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #111B21; color: #fff; padding: 10px 14px; border-radius: 8px; font-size: 13px; display: none; }
+    .toast.show { display: block; }
   </style>
 </head>
 <body>
@@ -43,7 +44,7 @@
       </div>
       <div class="count-pill" id="count">0 names</div>
     </header>
-    <div class="meta">
+    <div class="box">
       <div class="field">
         <label for="titleInput">List name</label>
         <input id="titleInput" type="text" maxlength="80" placeholder="e.g. Wedding guests" />
@@ -52,39 +53,162 @@
         <label for="descInput">Description</label>
         <textarea id="descInput" maxlength="300" placeholder="What this list is for"></textarea>
       </div>
-      <div class="field">
-        <label for="memberInput">Your name in the group</label>
-        <input id="memberInput" type="text" maxlength="40" placeholder="So others know who added a name" />
-      </div>
     </div>
-    <div class="composer">
-      <form id="form" class="row" autocomplete="off">
-        <input id="nameInput" type="text" maxlength="80" placeholder="Enter a name" enterkeyhint="done" />
-        <button class="add-btn" type="submit">Add</button>
+    <div class="box">
+      <form id="form" method="post" action="#" autocomplete="off">
+        <div class="row">
+          <input id="nameInput" type="text" maxlength="80" placeholder="Enter a name" enterkeyhint="done" />
+          <button class="add-btn" type="submit" id="addBtn">Add</button>
+        </div>
       </form>
-      <p class="hint">Tap Copy list, open the group in WhatsApp Business, then paste.</p>
+      <p class="hint">Tap Add after each name. Then Copy list and paste it in your WhatsApp Business group.</p>
     </div>
-    <p class="banner">Use <b>Copy list</b> then paste in your WhatsApp Business group. WhatsApp does not let a website jump straight into a group.</p>
     <div class="toolbar">
       <button type="button" id="copyList">Copy list</button>
-      <button type="button" id="shareGroup">Share sheet</button>
       <button type="button" id="downloadList">Download</button>
-      <button type="button" id="shareWa">Share text</button>
       <button type="button" class="danger" id="clearAll">Clear names</button>
     </div>
     <main>
       <div class="empty" id="empty">Your list is empty. Add the first name above.</div>
-      <ul id="list" hidden></ul>
+      <ul id="list"></ul>
     </main>
   </div>
   <div class="toast" id="toast"></div>
   <script>
-    if (navigator.serviceWorker) {
-      navigator.serviceWorker.getRegistrations().then(function (regs) {
-        regs.forEach(function (r) { r.unregister(); });
+    (function () {
+      var KEY = "wa-name-list-v3";
+      var titleInput = document.getElementById("titleInput");
+      var descInput = document.getElementById("descInput");
+      var headerTitle = document.getElementById("headerTitle");
+      var headerDesc = document.getElementById("headerDesc");
+      var input = document.getElementById("nameInput");
+      var form = document.getElementById("form");
+      var listEl = document.getElementById("list");
+      var empty = document.getElementById("empty");
+      var count = document.getElementById("count");
+      var toast = document.getElementById("toast");
+      var state = { title: "Name list", description: "", names: [] };
+
+      function clean(v) { return String(v || "").replace(/\s+/g, " ").trim(); }
+      function show(msg) {
+        toast.textContent = msg;
+        toast.className = "toast show";
+        setTimeout(function () { toast.className = "toast"; }, 1600);
+      }
+      function load() {
+        try {
+          var raw = localStorage.getItem(KEY);
+          if (raw) {
+            var parsed = JSON.parse(raw);
+            state.title = parsed.title || "Name list";
+            state.description = parsed.description || "";
+            state.names = parsed.names || [];
+          }
+        } catch (e) {}
+      }
+      function save() {
+        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+      }
+      function nameOf(item) {
+        return typeof item === "string" ? item : (item && item.name) || "";
+      }
+      function draw() {
+        var title = clean(state.title) || "Name list";
+        headerTitle.textContent = title;
+        headerDesc.textContent = clean(state.description) || "Type a name, tap Add.";
+        titleInput.value = state.title;
+        descInput.value = state.description;
+        count.textContent = state.names.length + (state.names.length === 1 ? " name" : " names");
+        empty.style.display = state.names.length ? "none" : "block";
+        var html = "";
+        for (var i = 0; i < state.names.length; i++) {
+          html += "<li><span class=\"num\">" + (i + 1) + "</span><span class=\"name\">" +
+            nameOf(state.names[i]).replace(/[&<>]/g, function (c) {
+              return ({ "&": "&", "<": "<", ">": ">" })[c];
+            }) +
+            "</span><button class=\"icon\" type=\"button\" data-i=\"" + i + "\">✕</button></li>";
+        }
+        listEl.innerHTML = html;
+      }
+      function addName() {
+        var name = clean(input.value);
+        if (!name) {
+          show("Type a name first");
+          input.focus();
+          return;
+        }
+        for (var i = 0; i < state.names.length; i++) {
+          if (nameOf(state.names[i]).toLowerCase() === name.toLowerCase()) {
+            show("Already on the list");
+            return;
+          }
+        }
+        state.names.push(name);
+        save();
+        input.value = "";
+        draw();
+        show("Added " + name);
+        input.focus();
+      }
+      function listText() {
+        var lines = [clean(state.title) || "Name list"];
+        if (clean(state.description)) lines.push(clean(state.description));
+        lines.push("");
+        for (var i = 0; i < state.names.length; i++) lines.push((i + 1) + ". " + nameOf(state.names[i]));
+        return lines.join("\n");
+      }
+
+      load();
+      draw();
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        addName();
       });
-    }
+      document.getElementById("addBtn").addEventListener("click", function (e) {
+        e.preventDefault();
+        addName();
+      });
+      titleInput.addEventListener("input", function () { state.title = titleInput.value; save(); draw(); });
+      descInput.addEventListener("input", function () { state.description = descInput.value; save(); draw(); });
+      listEl.addEventListener("click", function (e) {
+        var btn = e.target.closest("button[data-i]");
+        if (!btn) return;
+        state.names.splice(Number(btn.getAttribute("data-i")), 1);
+        save();
+        draw();
+      });
+      document.getElementById("copyList").addEventListener("click", function () {
+        if (!state.names.length) return show("Add a name first");
+        var text = listText();
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function () { show("Copied. Paste in your WhatsApp group."); }).catch(function () { window.prompt("Copy this list", text); });
+        } else {
+          window.prompt("Copy this list", text);
+        }
+      });
+      document.getElementById("downloadList").addEventListener("click", function () {
+        if (!state.names.length) return show("Add a name first");
+        var blob = new Blob([listText()], { type: "text/plain" });
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "name-list.txt";
+        a.click();
+      });
+      document.getElementById("clearAll").addEventListener("click", function () {
+        if (!state.names.length) return;
+        if (!confirm("Clear all names?")) return;
+        state.names = [];
+        save();
+        draw();
+      });
+      if (navigator.serviceWorker) {
+        navigator.serviceWorker.getRegistrations().then(function (regs) {
+          regs.forEach(function (r) { r.unregister(); });
+        });
+      }
+      input.focus();
+    })();
   </script>
-  <script src="app.js?v=5"></script>
 </body>
 </html>
