@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#075E54" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <title>WA Name List</title>
   <link rel="manifest" href="manifest.json" />
   <style>
@@ -62,14 +62,14 @@
         <input id="nameInput" type="text" maxlength="80" placeholder="Enter a name" enterkeyhint="done" />
         <button class="add-btn" type="submit">Add</button>
       </form>
-      <p class="hint">After you add a name, tap <b>Send to group</b> so other members get the updated list.</p>
+      <p class="hint">Tap Copy list, open the group in WhatsApp Business, then paste.</p>
     </div>
-    <p class="banner">WhatsApp cannot put this form inside the chat box. Open the group link, add a name, then send the update back to the group.</p>
+    <p class="banner">Use <b>Copy list</b> then paste in your WhatsApp Business group. WhatsApp does not let a website jump straight into a group.</p>
     <div class="toolbar">
-      <button type="button" id="shareGroup">Send to group</button>
+      <button type="button" id="copyList">Copy list</button>
+      <button type="button" id="shareGroup">Share sheet</button>
       <button type="button" id="downloadList">Download</button>
       <button type="button" id="shareWa">Share text</button>
-      <button type="button" id="copyList">Copy list</button>
       <button type="button" class="danger" id="clearAll">Clear names</button>
     </div>
     <main>
@@ -78,6 +78,13 @@
     </main>
   </div>
   <div class="toast" id="toast"></div>
-  <script src="app.js"></script>
+  <script>
+    if (navigator.serviceWorker) {
+      navigator.serviceWorker.getRegistrations().then(function (regs) {
+        regs.forEach(function (r) { r.unregister(); });
+      });
+    }
+  </script>
+  <script src="app.js?v=5"></script>
 </body>
 </html>
