@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#075E54" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Name List" />
+  <title>WA Name List</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%2325D366'/><text x='50' y='64' text-anchor='middle' font-size='48'>N</text></svg>" />
+  <style>
+    :root {
+      --wa-teal: #075E54;
+      --wa-green: #128C7E;
+      --wa-accent: #25D366;
+      --wa-chat: #ECE5DD;
+      --wa-bubble: #DCF8C6;
+      --ink: #111B21;
+      --muted: #667781;
+      --card: #ffffff;
+      --danger: #E53935;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--wa-chat);
+      color: var(--ink);
+      display: flex;
+      justify-content: center;
+    }
+    .app {
+      width: min(520px, 100%);
+      min-height: 100%;
+      background:
+        linear-gradient(180deg, rgba(7,94,84,.06), transparent 120px),
+        var(--wa-chat);
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: var(--wa-teal);
+      color: white;
+      padding: calc(14px + env(safe-area-inset-top)) 16px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 650;
+      letter-spacing: .2px;
+    }
+    header p {
+      margin: 2px 0 0;
+      font-size: 12px;
+      opacity: .85;
+    }
+    .count-pill {
+      background: rgba(255,255,255,.16);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    .composer {
+      background: white;
+      padding: 12px 12px 10px;
+      box-shadow: 0 1px 8px rgba(0,0,0,.06);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    .row {
+      display: flex;
+      gap: 8px;
+    }
+    input[type="text"] {
+      flex: 1;
+      border: 1px solid #d8e0e5;
+      border-radius: 24px;
+      padding: 12px 14px;
+      font-size: 16px;
+      outline: none;
+      background: #f0f2f5;
+    }
+    input[type="text"]:focus {
+      border-color: var(--wa-green);
+      background: white;
+    }
+    button {
+      border: 0;
+      cursor: pointer;
+      font-weight: 650;
+    }
+    .add-btn {
+      background: var(--wa-accent);
+      color: #053;
+      border-radius: 24px;
+      padding: 0 16px;
+      min-width: 72px;
+    }
+    .hint {
+      margin: 8px 2px 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      padding: 10px 12px 0;
+      flex-wrap: wrap;
+    }
+    .toolbar button, .ghost {
+      background: white;
+      color: var(--wa-teal);
+      border-radius: 18px;
+      padding: 8px 12px;
+      font-size: 13px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.06);
+    }
+    .toolbar button.danger { color: var(--danger); }
+    main {
+      flex: 1;
+      padding: 12px;
+      padding-bottom: calc(24px + env(safe-area-inset-bottom));
+    }
+    .empty {
+      background: white;
+      border-radius: 16px;
+      padding: 28px 18px;
+      text-align: center;
+      color: var(--muted);
+    }
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 8px;
+    }
+    li {
+      background: var(--wa-bubble);
+      border-radius: 16px 16px 4px 16px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 1px 1px rgba(0,0,0,.05);
+    }
+    .num {
+      width: 24px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .name {
+      flex: 1;
+      font-size: 16px;
+      word-break: break-word;
+    }
+    .name[contenteditable="true"] {
+      background: white;
+      border-radius: 8px;
+      padding: 4px 8px;
+      outline: 2px solid var(--wa-green);
+    }
+    .actions { display: flex; gap: 4px; }
+    .icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: transparent;
+      color: var(--wa-teal);
+      font-size: 14px;
+    }
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%);
+      background: #111B21;
+      color: white;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s;
+      z-index: 5;
+    }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <h1>Name list</h1>
+        <p>Type a name, tap Add. No cut and paste.</p>
+      </div>
+      <div class="count-pill" id="count">0 names</div>
+    </header>
+    <div class="composer">
+      <form id="form" class="row" autocomplete="off">
+        <input id="nameInput" type="text" maxlength="80" placeholder="Enter a name" enterkeyhint="done" />
+        <button class="add-btn" type="submit">Add</button>
+      </form>
+      <p class="hint">Names stay on this phone. Share them to WhatsApp when you are ready.</p>
+    </div>
+    <div class="toolbar">
+      <button type="button" id="shareWa">Share on WhatsApp</button>
+      <button type="button" id="copyList">Copy list</button>
+      <button type="button" id="exportTxt">Save .txt</button>
+      <button type="button" class="danger" id="clearAll">Clear</button>
+    </div>
+    <main>
+      <div class="empty" id="empty">Your list is empty. Add the first name above.</div>
+      <ul id="list" hidden></ul>
+    </main>
+  </div>
+  <div class="toast" id="toast"></div>
+  <script>
+    const KEY = "wa-name-list-v1";
+    const input = document.getElementById("nameInput");
+    const form = document.getElementById("form");
+    const listEl = document.getElementById("list");
+    const empty = document.getElementById("empty");
+    const count = document.getElementById("count");
+    const toast = document.getElementById("toast");
+
+    let names = load();
+
+    function load() {
+      try { return JSON.parse(localStorage.getItem(KEY) || "[]"); }
+      catch { return []; }
+    }
+    function save() {
+      localStorage.setItem(KEY, JSON.stringify(names));
+    }
+    function clean(value) {
+      return value.replace(/\s+/g, " ").trim();
+    }
+    function toastMsg(text) {
+      toast.textContent = text;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 1600);
+    }
+    function numberedText() {
+      return names.map((n, i) => (i + 1) + ". " + n).join("\n");
+    }
+    function render() {
+      count.textContent = names.length + (names.length === 1 ? " name" : " names");
+      empty.hidden = names.length > 0;
+      listEl.hidden = names.length === 0;
+      listEl.innerHTML = names.map((name, i) => `
+        <li data-i="${i}">
+          <span class="num">${i + 1}</span>
+          <span class="name">${escapeHtml(name)}</span>
+          <div class="actions">
+            <button class="icon" type="button" data-act="edit" aria-label="Edit">✎</button>
+            <button class="icon" type="button" data-act="del" aria-label="Remove">✕</button>
+          </div>
+        </li>`).join("");
+    }
+    function escapeHtml(s) {
+      return s.replace(/[&<>"']/g, c => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[c]));
+    }
+    function addName(raw) {
+      const name = clean(raw);
+      if (!name) return;
+      const exists = names.some(n => n.toLowerCase() === name.toLowerCase());
+      if (exists) {
+        toastMsg("Already on the list");
+        return;
+      }
+      names.push(name);
+      save();
+      render();
+      toastMsg("Added " + name);
+    }
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      addName(input.value);
+      input.value = "";
+      input.focus();
+    });
+
+    listEl.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-act]");
+      if (!btn) return;
+      const li = btn.closest("li");
+      const i = Number(li.dataset.i);
+      if (btn.dataset.act === "del") {
+        const removed = names.splice(i, 1)[0];
+        save();
+        render();
+        toastMsg("Removed " + removed);
+      }
+      if (btn.dataset.act === "edit") {
+        const span = li.querySelector(".name");
+        span.contentEditable = "true";
+        span.focus();
+        document.execCommand("selectAll", false, null);
+        const finish = () => {
+          span.contentEditable = "false";
+          const next = clean(span.textContent || "");
+          if (!next) {
+            names.splice(i, 1);
+          } else {
+            names[i] = next;
+          }
+          save();
+          render();
+        };
+        span.addEventListener("blur", finish, { once: true });
+        span.addEventListener("keydown", (ev) => {
+          if (ev.key === "Enter") {
+            ev.preventDefault();
+            span.blur();
+          }
+        });
+      }
+    });
+
+    document.getElementById("shareWa").addEventListener("click", () => {
+      if (!names.length) return toastMsg("Add a name first");
+      const text = "Name list (" + names.length + ")\n\n" + numberedText();
+      const url = "https://wa.me/?text=" + encodeURIComponent(text);
+      window.location.href = url;
+    });
+
+    document.getElementById("copyList").addEventListener("click", async () => {
+      if (!names.length) return toastMsg("Add a name first");
+      try {
+        await navigator.clipboard.writeText(numberedText());
+        toastMsg("List copied");
+      } catch {
+        toastMsg("Could not copy");
+      }
+    });
+
+    document.getElementById("exportTxt").addEventListener("click", () => {
+      if (!names.length) return toastMsg("Add a name first");
+      const blob = new Blob([numberedText()], { type: "text/plain" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "name-list.txt";
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+
+    document.getElementById("clearAll").addEventListener("click", () => {
+      if (!names.length) return;
+      if (!confirm("Clear the whole list?")) return;
+      names = [];
+      save();
+      render();
+    });
+
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js").catch(() => {});
+    }
+
+    render();
+    input.focus();
+  </script>
+</body>
+</html>

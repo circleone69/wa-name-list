@@ -1,0 +1,17 @@
+{
+  "name": "WA Name List",
+  "short_name": "Name List",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ECE5DD",
+  "theme_color": "#075E54",
+  "description": "Keep adding names to a list and share them on WhatsApp.",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
