@@ -61,7 +61,7 @@
           <button class="add-btn" type="submit" id="addBtn">Add</button>
         </div>
       </form>
-      <p class="hint">Add names here. Tap <b>Send to group</b>, search the group name, then send.</p>
+      <p class="hint">Tap <b>Send to group</b>, choose <b>WhatsApp Business</b>, search the group, then send.</p>
     </div>
     <div class="toolbar">
       <button type="button" class="wa" id="sendGroup">Send to group</button>
@@ -94,7 +94,7 @@
       function show(msg) {
         toast.textContent = msg;
         toast.className = "toast show";
-        setTimeout(function () { toast.className = "toast"; }, 2000);
+        setTimeout(function () { toast.className = "toast"; }, 2200);
       }
       function load() {
         try {
@@ -153,20 +153,26 @@
         for (var i = 0; i < state.names.length; i++) lines.push((i + 1) + ". " + nameOf(state.names[i]));
         return lines.join("\n");
       }
+      function copyText(text, okMsg) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function () { show(okMsg); }).catch(function () { window.prompt("Copy this list", text); });
+        } else {
+          window.prompt("Copy this list", text);
+        }
+      }
       function sendToGroup() {
         if (!state.names.length) return show("Add a name first");
         var text = listText();
-        var encoded = encodeURIComponent(text);
-        var android = /android/i.test(navigator.userAgent || "");
-        show("Search the group name, then tap Send");
-        if (android) {
-          window.location.href = "intent://send?text=" + encoded + "#Intent;scheme=whatsapp;package=com.whatsapp.w4b;S.browser_fallback_url=whatsapp://send?text=" + encoded + ";end";
+        if (navigator.share) {
+          navigator.share({ text: text }).then(function () {
+            show("Pick WhatsApp Business, then the group");
+          }).catch(function (err) {
+            if (err && err.name === "AbortError") return;
+            copyText(text, "Copied. Open WhatsApp Business, open the group, paste.");
+          });
           return;
         }
-        window.location.href = "whatsapp-business://send?text=" + encoded;
-        setTimeout(function () {
-          window.location.href = "whatsapp://send?text=" + encoded;
-        }, 700);
+        copyText(text, "Copied. Open WhatsApp Business, open the group, paste.");
       }
 
       load();
@@ -185,12 +191,7 @@
       document.getElementById("sendGroup").addEventListener("click", sendToGroup);
       document.getElementById("copyList").addEventListener("click", function () {
         if (!state.names.length) return show("Add a name first");
-        var text = listText();
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(text).then(function () { show("Copied. Open the group and paste."); }).catch(function () { window.prompt("Copy this list", text); });
-        } else {
-          window.prompt("Copy this list", text);
-        }
+        copyText(listText(), "Copied. Open the group and paste.");
       });
       document.getElementById("downloadList").addEventListener("click", function () {
         if (!state.names.length) return show("Add a name first");
