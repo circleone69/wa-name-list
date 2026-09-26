@@ -76,7 +76,7 @@ function clean(value) {
 function toastMsg(text) {
   toast.textContent = text;
   toast.classList.add("show");
-  setTimeout(() => toast.classList.remove("show"), 1800);
+  setTimeout(() => toast.classList.remove("show"), 2200);
 }
 function listTitle() {
   return clean(state.title) || "Name list";
@@ -111,21 +111,20 @@ function downloadFile(filename, text, type) {
   URL.revokeObjectURL(a.href);
 }
 async function shareToWhatsApp(text) {
-  const message = text;
-  const url = listUrl();
+  const message = text + "\n\n" + listUrl();
   if (navigator.share) {
     try {
-      await navigator.share({ title: listTitle(), text: message, url: url });
+      await navigator.share({ text: message });
       return;
     } catch (err) {
       if (err && err.name === "AbortError") return;
     }
   }
   try {
-    await navigator.clipboard.writeText(message + "\n\n" + url);
-    toastMsg("Copied. Open WhatsApp Business and paste in the group.");
+    await navigator.clipboard.writeText(message);
+    toastMsg("Copied. Open the group in WhatsApp Business and paste.");
   } catch {
-    toastMsg("Copy the list, then paste it in WhatsApp Business.");
+    toastMsg("Copy the list, then paste it in the group.");
   }
 }
 function escapeHtml(s) {
@@ -144,7 +143,7 @@ function render() {
   listEl.innerHTML = state.names.map((item, i) => {
     const name = entryName(item);
     const by = entryBy(item);
-    return "<li data-i=\"" + i + "\"><span class=\"num\">" + (i + 1) + "</span><span class=\"name\">" + escapeHtml(name) + (by ? "<br><small>" + escapeHtml("added by " + by) + "</small>" : "") + "</span><div class=\"actions\"><button class=\"icon\" type=\"button\" data-act=\"edit\" aria-label=\"Edit\">\u270e</button><button class=\"icon\" type=\"button\" data-act=\"del\" aria-label=\"Remove\">\u2715</button></div></li>";
+    return "<li data-i=\"" + i + "\"><span class=\"num\">" + (i + 1) + "</span><span class=\"name\">" + escapeHtml(name) + (by ? "<br><small>" + escapeHtml("added by " + by) + "</small>" : "") + "</span><div class=\"actions\"><button class=\"icon\" type=\"button\" data-act=\"edit\" aria-label=\"Edit\">✎</button><button class=\"icon\" type=\"button\" data-act=\"del\" aria-label=\"Remove\">✕</button></div></li>";
   }).join("");
 }
 function addName(raw) {
@@ -233,7 +232,7 @@ document.getElementById("shareWa").addEventListener("click", function () {
 document.getElementById("copyList").addEventListener("click", async function () {
   try {
     await navigator.clipboard.writeText(fullText() + "\n\n" + listUrl());
-    toastMsg("List and link copied");
+    toastMsg("Copied. Open the group and paste.");
   } catch {
     toastMsg("Could not copy");
   }
