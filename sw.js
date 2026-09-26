@@ -1,11 +1,22 @@
 self.addEventListener("install", (event) => {
+  self.skipWaiting();
   event.waitUntil(
-    caches.open("wa-name-list-v1").then((cache) => cache.addAll(["./", "./index.html", "./manifest.json"]))
+    caches.open("wa-name-list-v2").then((cache) => cache.addAll(["./", "./index.html", "./manifest.json"]))
+  );
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== "wa-name-list-v2").map((k) => caches.delete(k))))
   );
 });
 
 self.addEventListener("fetch", (event) => {
   event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request))
+    fetch(event.request).then((res) => {
+      const copy = res.clone();
+      caches.open("wa-name-list-v2").then((cache) => cache.put(event.request, copy));
+      return res;
+    }).catch(() => caches.match(event.request))
   );
 });
