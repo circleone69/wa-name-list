@@ -110,12 +110,27 @@ function downloadFile(filename, text, type) {
   a.click();
   URL.revokeObjectURL(a.href);
 }
-function openWhatsApp(text) {
-  window.location.href = "https://wa.me/?text=" + encodeURIComponent(text);
+async function shareToWhatsApp(text) {
+  const message = text;
+  const url = listUrl();
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: listTitle(), text: message, url: url });
+      return;
+    } catch (err) {
+      if (err && err.name === "AbortError") return;
+    }
+  }
+  try {
+    await navigator.clipboard.writeText(message + "\n\n" + url);
+    toastMsg("Copied. Open WhatsApp Business and paste in the group.");
+  } catch {
+    toastMsg("Copy the list, then paste it in WhatsApp Business.");
+  }
 }
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, function (c) {
-    return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c];
+    return ({ "&": "&", "<": "<", ">": ">", '"': """, "'": "&#39;" })[c];
   });
 }
 function render() {
@@ -129,7 +144,7 @@ function render() {
   listEl.innerHTML = state.names.map((item, i) => {
     const name = entryName(item);
     const by = entryBy(item);
-    return "<li data-i=\"" + i + "\"><span class=\"num\">" + (i + 1) + "</span><span class=\"name\">" + escapeHtml(name) + (by ? "<br><small>" + escapeHtml("added by " + by) + "</small>" : "") + "</span><div class=\"actions\"><button class=\"icon\" type=\"button\" data-act=\"edit\" aria-label=\"Edit\">✎</button><button class=\"icon\" type=\"button\" data-act=\"del\" aria-label=\"Remove\">✕</button></div></li>";
+    return "<li data-i=\"" + i + "\"><span class=\"num\">" + (i + 1) + "</span><span class=\"name\">" + escapeHtml(name) + (by ? "<br><small>" + escapeHtml("added by " + by) + "</small>" : "") + "</span><div class=\"actions\"><button class=\"icon\" type=\"button\" data-act=\"edit\" aria-label=\"Edit\">\u270e</button><button class=\"icon\" type=\"button\" data-act=\"del\" aria-label=\"Remove\">\u2715</button></div></li>";
   }).join("");
 }
 function addName(raw) {
@@ -205,7 +220,7 @@ listEl.addEventListener("click", function (e) {
   }
 });
 document.getElementById("shareGroup").addEventListener("click", function () {
-  openWhatsApp(fullText() + "\n\nOpen this in WhatsApp to add more names:\n" + listUrl());
+  shareToWhatsApp(fullText() + "\n\nOpen this link to add more names:");
 });
 document.getElementById("downloadList").addEventListener("click", function () {
   downloadFile(fileSlug() + ".txt", fullText(), "text/plain");
@@ -213,7 +228,7 @@ document.getElementById("downloadList").addEventListener("click", function () {
 });
 document.getElementById("shareWa").addEventListener("click", function () {
   if (!state.names.length) return toastMsg("Add a name first");
-  openWhatsApp(fullText());
+  shareToWhatsApp(fullText());
 });
 document.getElementById("copyList").addEventListener("click", async function () {
   try {
