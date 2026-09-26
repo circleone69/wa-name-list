@@ -19,7 +19,6 @@
       --wa-bubble: #DCF8C6;
       --ink: #111B21;
       --muted: #667781;
-      --card: #ffffff;
       --danger: #E53935;
     }
     * { box-sizing: border-box; }
@@ -45,58 +44,56 @@
       color: white;
       padding: calc(14px + env(safe-area-inset-top)) 16px 14px;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
       gap: 12px;
     }
-    header h1 {
-      margin: 0;
-      font-size: 18px;
-      font-weight: 650;
-      letter-spacing: .2px;
-    }
-    header p {
-      margin: 2px 0 0;
-      font-size: 12px;
-      opacity: .85;
-    }
+    header h1 { margin: 0; font-size: 18px; font-weight: 650; }
+    header p { margin: 2px 0 0; font-size: 12px; opacity: .85; }
     .count-pill {
       background: rgba(255,255,255,.16);
       border-radius: 999px;
       padding: 6px 10px;
       font-size: 12px;
       white-space: nowrap;
+      margin-top: 2px;
     }
-    .composer {
+    .meta, .composer {
       background: white;
-      padding: 12px 12px 10px;
+      padding: 12px;
       box-shadow: 0 1px 8px rgba(0,0,0,.06);
-      position: sticky;
-      top: 0;
-      z-index: 2;
     }
-    .row {
-      display: flex;
-      gap: 8px;
+    .meta { padding-bottom: 10px; }
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: .3px;
+      text-transform: uppercase;
+      margin: 0 0 6px;
     }
-    input[type="text"] {
-      flex: 1;
+    .field { margin-bottom: 10px; }
+    .field:last-child { margin-bottom: 0; }
+    input[type="text"], textarea {
+      width: 100%;
       border: 1px solid #d8e0e5;
-      border-radius: 24px;
-      padding: 12px 14px;
+      border-radius: 14px;
+      padding: 11px 12px;
       font-size: 16px;
       outline: none;
       background: #f0f2f5;
+      font-family: inherit;
+      color: var(--ink);
     }
-    input[type="text"]:focus {
+    textarea { min-height: 68px; resize: vertical; }
+    input[type="text"]:focus, textarea:focus {
       border-color: var(--wa-green);
       background: white;
     }
-    button {
-      border: 0;
-      cursor: pointer;
-      font-weight: 650;
-    }
+    .row { display: flex; gap: 8px; }
+    .row input[type="text"] { flex: 1; border-radius: 24px; }
+    button { border: 0; cursor: pointer; font-weight: 650; }
     .add-btn {
       background: var(--wa-accent);
       color: #053;
@@ -104,18 +101,14 @@
       padding: 0 16px;
       min-width: 72px;
     }
-    .hint {
-      margin: 8px 2px 0;
-      color: var(--muted);
-      font-size: 12px;
-    }
+    .hint { margin: 8px 2px 0; color: var(--muted); font-size: 12px; }
     .toolbar {
       display: flex;
       gap: 8px;
       padding: 10px 12px 0;
       flex-wrap: wrap;
     }
-    .toolbar button, .ghost {
+    .toolbar button {
       background: white;
       color: var(--wa-teal);
       border-radius: 18px;
@@ -136,13 +129,7 @@
       text-align: center;
       color: var(--muted);
     }
-    ul {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      display: grid;
-      gap: 8px;
-    }
+    ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
     li {
       background: var(--wa-bubble);
       border-radius: 16px 16px 4px 16px;
@@ -152,18 +139,8 @@
       gap: 10px;
       box-shadow: 0 1px 1px rgba(0,0,0,.05);
     }
-    .num {
-      width: 24px;
-      color: var(--muted);
-      font-size: 12px;
-      text-align: right;
-      flex-shrink: 0;
-    }
-    .name {
-      flex: 1;
-      font-size: 16px;
-      word-break: break-word;
-    }
+    .num { width: 24px; color: var(--muted); font-size: 12px; text-align: right; flex-shrink: 0; }
+    .name { flex: 1; font-size: 16px; word-break: break-word; }
     .name[contenteditable="true"] {
       background: white;
       border-radius: 8px;
@@ -201,23 +178,33 @@
   <div class="app">
     <header>
       <div>
-        <h1>Name list</h1>
-        <p>Type a name, tap Add. No cut and paste.</p>
+        <h1 id="headerTitle">Name list</h1>
+        <p id="headerDesc">Type a name, tap Add.</p>
       </div>
       <div class="count-pill" id="count">0 names</div>
     </header>
+    <div class="meta">
+      <div class="field">
+        <label for="titleInput">List name</label>
+        <input id="titleInput" type="text" maxlength="80" placeholder="e.g. Wedding guests" />
+      </div>
+      <div class="field">
+        <label for="descInput">Description</label>
+        <textarea id="descInput" maxlength="300" placeholder="What this list is for"></textarea>
+      </div>
+    </div>
     <div class="composer">
       <form id="form" class="row" autocomplete="off">
         <input id="nameInput" type="text" maxlength="80" placeholder="Enter a name" enterkeyhint="done" />
         <button class="add-btn" type="submit">Add</button>
       </form>
-      <p class="hint">Names stay on this phone. Share them to WhatsApp when you are ready.</p>
+      <p class="hint">Names stay on this phone. Download or share when you are ready.</p>
     </div>
     <div class="toolbar">
+      <button type="button" id="downloadList">Download</button>
       <button type="button" id="shareWa">Share on WhatsApp</button>
       <button type="button" id="copyList">Copy list</button>
-      <button type="button" id="exportTxt">Save .txt</button>
-      <button type="button" class="danger" id="clearAll">Clear</button>
+      <button type="button" class="danger" id="clearAll">Clear names</button>
     </div>
     <main>
       <div class="empty" id="empty">Your list is empty. Add the first name above.</div>
@@ -226,7 +213,12 @@
   </div>
   <div class="toast" id="toast"></div>
   <script>
-    const KEY = "wa-name-list-v1";
+    const KEY = "wa-name-list-v2";
+    const OLD_KEY = "wa-name-list-v1";
+    const titleInput = document.getElementById("titleInput");
+    const descInput = document.getElementById("descInput");
+    const headerTitle = document.getElementById("headerTitle");
+    const headerDesc = document.getElementById("headerDesc");
     const input = document.getElementById("nameInput");
     const form = document.getElementById("form");
     const listEl = document.getElementById("list");
@@ -234,31 +226,79 @@
     const count = document.getElementById("count");
     const toast = document.getElementById("toast");
 
-    let names = load();
+    let state = load();
 
+    function defaultState() {
+      return { title: "Name list", description: "", names: [] };
+    }
     function load() {
-      try { return JSON.parse(localStorage.getItem(KEY) || "[]"); }
-      catch { return []; }
+      try {
+        const raw = localStorage.getItem(KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          return {
+            title: parsed.title || "Name list",
+            description: parsed.description || "",
+            names: Array.isArray(parsed.names) ? parsed.names : []
+          };
+        }
+        const old = localStorage.getItem(OLD_KEY);
+        if (old) {
+          const names = JSON.parse(old);
+          return { title: "Name list", description: "", names: Array.isArray(names) ? names : [] };
+        }
+      } catch {}
+      return defaultState();
     }
     function save() {
-      localStorage.setItem(KEY, JSON.stringify(names));
+      localStorage.setItem(KEY, JSON.stringify(state));
     }
     function clean(value) {
-      return value.replace(/\s+/g, " ").trim();
+      return String(value || "").replace(/\s+/g, " ").trim();
     }
     function toastMsg(text) {
       toast.textContent = text;
       toast.classList.add("show");
       setTimeout(() => toast.classList.remove("show"), 1600);
     }
+    function listTitle() {
+      return clean(state.title) || "Name list";
+    }
     function numberedText() {
-      return names.map((n, i) => (i + 1) + ". " + n).join("\n");
+      return state.names.map((n, i) => (i + 1) + ". " + n).join("\n");
+    }
+    function fullText() {
+      const lines = [listTitle()];
+      const desc = clean(state.description);
+      if (desc) lines.push(desc);
+      lines.push("");
+      lines.push(state.names.length + (state.names.length === 1 ? " name" : " names"));
+      if (state.names.length) {
+        lines.push("");
+        lines.push(numberedText());
+      }
+      return lines.join("\n");
+    }
+    function fileSlug() {
+      return listTitle().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "name-list";
+    }
+    function downloadFile(filename, text, type) {
+      const blob = new Blob([text], { type: type || "text/plain" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(a.href);
     }
     function render() {
-      count.textContent = names.length + (names.length === 1 ? " name" : " names");
-      empty.hidden = names.length > 0;
-      listEl.hidden = names.length === 0;
-      listEl.innerHTML = names.map((name, i) => `
+      headerTitle.textContent = listTitle();
+      headerDesc.textContent = clean(state.description) || "Type a name, tap Add.";
+      titleInput.value = state.title;
+      descInput.value = state.description;
+      count.textContent = state.names.length + (state.names.length === 1 ? " name" : " names");
+      empty.hidden = state.names.length > 0;
+      listEl.hidden = state.names.length === 0;
+      listEl.innerHTML = state.names.map((name, i) => `
         <li data-i="${i}">
           <span class="num">${i + 1}</span>
           <span class="name">${escapeHtml(name)}</span>
@@ -270,22 +310,33 @@
     }
     function escapeHtml(s) {
       return s.replace(/[&<>"']/g, c => ({
-        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+        "&": "&", "<": "<", ">": ">", '"': """, "'": "&#39;"
       }[c]));
     }
     function addName(raw) {
       const name = clean(raw);
       if (!name) return;
-      const exists = names.some(n => n.toLowerCase() === name.toLowerCase());
+      const exists = state.names.some(n => n.toLowerCase() === name.toLowerCase());
       if (exists) {
         toastMsg("Already on the list");
         return;
       }
-      names.push(name);
+      state.names.push(name);
       save();
       render();
       toastMsg("Added " + name);
     }
+
+    titleInput.addEventListener("input", () => {
+      state.title = titleInput.value;
+      headerTitle.textContent = listTitle();
+      save();
+    });
+    descInput.addEventListener("input", () => {
+      state.description = descInput.value;
+      headerDesc.textContent = clean(state.description) || "Type a name, tap Add.";
+      save();
+    });
 
     form.addEventListener("submit", (e) => {
       e.preventDefault();
@@ -300,7 +351,7 @@
       const li = btn.closest("li");
       const i = Number(li.dataset.i);
       if (btn.dataset.act === "del") {
-        const removed = names.splice(i, 1)[0];
+        const removed = state.names.splice(i, 1)[0];
         save();
         render();
         toastMsg("Removed " + removed);
@@ -313,11 +364,8 @@
         const finish = () => {
           span.contentEditable = "false";
           const next = clean(span.textContent || "");
-          if (!next) {
-            names.splice(i, 1);
-          } else {
-            names[i] = next;
-          }
+          if (!next) state.names.splice(i, 1);
+          else state.names[i] = next;
           save();
           render();
         };
@@ -331,37 +379,29 @@
       }
     });
 
+    document.getElementById("downloadList").addEventListener("click", () => {
+      downloadFile(fileSlug() + ".txt", fullText(), "text/plain");
+      toastMsg("Downloaded");
+    });
+
     document.getElementById("shareWa").addEventListener("click", () => {
-      if (!names.length) return toastMsg("Add a name first");
-      const text = "Name list (" + names.length + ")\n\n" + numberedText();
-      const url = "https://wa.me/?text=" + encodeURIComponent(text);
-      window.location.href = url;
+      if (!state.names.length) return toastMsg("Add a name first");
+      window.location.href = "https://wa.me/?text=" + encodeURIComponent(fullText());
     });
 
     document.getElementById("copyList").addEventListener("click", async () => {
-      if (!names.length) return toastMsg("Add a name first");
       try {
-        await navigator.clipboard.writeText(numberedText());
+        await navigator.clipboard.writeText(fullText());
         toastMsg("List copied");
       } catch {
         toastMsg("Could not copy");
       }
     });
 
-    document.getElementById("exportTxt").addEventListener("click", () => {
-      if (!names.length) return toastMsg("Add a name first");
-      const blob = new Blob([numberedText()], { type: "text/plain" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "name-list.txt";
-      a.click();
-      URL.revokeObjectURL(a.href);
-    });
-
     document.getElementById("clearAll").addEventListener("click", () => {
-      if (!names.length) return;
-      if (!confirm("Clear the whole list?")) return;
-      names = [];
+      if (!state.names.length) return;
+      if (!confirm("Clear all names? The list name and description stay.")) return;
+      state.names = [];
       save();
       render();
     });
@@ -371,7 +411,6 @@
     }
 
     render();
-    input.focus();
   </script>
 </body>
 </html>
